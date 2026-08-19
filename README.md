@@ -5,44 +5,80 @@
 ALTER is an interactive web app where you build your Future Self, make
 real-world decisions, complete daily missions, and watch two timelines
 unfold side by side: the person you're becoming (**Future You**) and
-where your current habits lead if nothing changes (**Ghost You**).
+where your current habits lead if nothing changes (**Ghost You**). See
+`docs/product/pitch.md` for the full product pitch.
 
 ## Core loop
 
-1. **Onboarding** — pick your focus areas (Love, Money, Career, Lifestyle,
-   Travel, Confidence, Body/Fitness, Family) and build your Future Self —
-   a name, a target date, and headline goals.
-2. **Daily Decision** — a scenario grounded in your goals with several
-   choices. Each choice shifts your timeline stats and nudges your
-   target date.
-3. **Timelines** — Future You vs Ghost You, rendered as stat bars that
-   diverge over time based on what you actually do.
-4. **Missions** — small daily actions worth XP, with streaks, levels, and
-   milestones.
-5. **Ask Future Me** — a chat with your own Future Self, grounded in your
-   goals, decisions, journal entries, and mission history (no generic
-   assistant framing).
-6. **Pricing** — Free / ALTER+ / ALTER Together / ALTER Family tiers, as
-   described in product materials.
+See `docs/user-flows/core-loop.md` for the full route-by-route flow.
+
+1. **Onboarding** (`/onboarding`) — pick your focus areas, build your
+   Future Self, set one real target per area.
+2. **Daily Decision** (`/decisions`) — a scenario grounded in your
+   goals. Preview the impact of each option before committing.
+3. **Future You / Ghost You** (`/future-you`, `/ghost-you`) — per-goal
+   timelines that diverge based on what you actually do.
+4. **Missions** (`/missions`) — small daily actions worth XP, with
+   streaks and levels.
+5. **Ask Future Me** (`/ask-future-me`) — a chat with your own Future
+   Self, grounded in your goals, decisions, and journal entries.
+6. **Timeline** (`/timeline`) — a unified activity feed.
+7. **Paywall** (`/paywall`) — Free / ALTER+ / ALTER Together / ALTER
+   Family tiers.
+
+## Architecture
+
+```
+app/            Next.js App Router routes (one folder per screen)
+components/     UI building blocks (buttons, cards, progress, modals, navigation, avatar)
+features/       Product logic above the engine (goals, missions, xp, streaks, achievements, simulations, future-self, ghost-self)
+services/       External-system boundaries (ai, auth, database, payments, notifications, analytics) — see below
+data/           Static content (mission templates, life categories, decision scenarios, xp rules, achievements)
+hooks/          App state (useAppStore, zustand+localStorage) and derived-data hooks
+utils/          Framework-agnostic helpers (dates)
+types/          App-level shared types
+constants/      Routes/nav config
+supabase/       Forward-looking schema (migrations), seed data, and an edge function skeleton — not connected to a live project
+docs/           Product spec, engine spec, user flows, wireframe/mockup notes, database notes
+tests/          Vitest unit tests (the engine's 18 tests, currently)
+```
+
+The **simulation engine** (`features/simulations/engine/`) is the one
+part of this app that's a pure, dependency-free TypeScript module — see
+`docs/product/engine-spec.md` for the full spec it implements (goals,
+EWMA trajectories, the tanh confidence curve, Ghost You's cold-start/
+warm-blend model, decision time-shift math, the decision simulator, and
+safety rails). Every number the UI shows is read from this engine's
+output, never computed ad hoc in a component.
+
+## Current state vs. target architecture
+
+- **No live backend.** Everything persists to `localStorage` via
+  `hooks/useAppStore.ts`. `supabase/migrations/0001_init.sql` defines
+  the schema a real Supabase project would use; `services/database`
+  documents the interface that would sit between the store and it.
+- **No real auth, payments, or push notifications.** `services/auth`,
+  `services/payments`, and `services/notifications` are typed
+  interfaces with local/no-op implementations, ready to swap for real
+  providers.
+- **"Ask Future Me" is not an LLM call.** `services/ai` implements the
+  engine spec's §9 contract (numbers only ever come from the engine
+  payload) with a deterministic, keyword-routed generator — see the
+  note in `docs/product/engine-spec.md` §9.
 
 ## Tech
 
-- React + TypeScript + Vite
+- Next.js (App Router) + React + TypeScript
 - Tailwind CSS for styling
-- Zustand (`localStorage`-persisted) for state — the whole simulation
-  runs client-side, no backend required for the MVP
+- Zustand (`localStorage`-persisted) for client state
+- Vitest for the engine's unit tests
 
 ## Development
 
 ```bash
 npm install
-npm run dev
+npm run dev     # Next.js dev server
+npm run build   # production build
+npm run test    # vitest — engine unit tests
+npm run lint    # eslint
 ```
-
-## Notes on "AI"
-
-`Ask Future Me` and the decision-impact narration are implemented as a
-deterministic, context-aware response engine (no external LLM call) so
-the app runs fully offline. It reads from the same goal/decision/mission
-state the rest of the app uses, which is the important part: responses
-get more specific as your history accumulates.
