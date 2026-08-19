@@ -12,9 +12,22 @@ body,
 }
 
 body {
-  background-color: #05050a;
+  background-color: #0a0813;
   color: #f3f2fa;
   font-feature-settings: "ss01";
+}
+
+.grad-primary {
+  background-image: linear-gradient(90deg, #ec4899, #a855f7);
+}
+.grad-primary-text {
+  background-image: linear-gradient(90deg, #f472b6, #c084fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.grad-ring {
+  background-image: conic-gradient(from 0deg, #ec4899, #a855f7, #ec4899);
 }
 
 ::-webkit-scrollbar {

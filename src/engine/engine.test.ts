@@ -107,6 +107,22 @@ describe("§4 decision worked example", () => {
   });
 });
 
+describe("day-one decisions (EWMA cold-start seed)", () => {
+  it("a brand new goal with zero action history still registers a decision's impact", () => {
+    // Fresh goal, no actions logged yet — the exact state a user is in
+    // for their very first "today's decision" in the app.
+    const goal = makeGoal({ baseline: 0, target: 12000, onboardingDailyRate: 5, createdAt: "2026-01-01" });
+    const event = applyDecisionEvent(
+      [goal],
+      [],
+      [{ goalId: goal.goalId, delta: 400, deltaType: "direct" }],
+      "2026-01-01",
+    );
+    expect(event.timelinePctChange).toBeGreaterThan(0);
+    expect(event.timeShiftDays).toBeGreaterThan(0);
+  });
+});
+
 describe("§3 Ghost You", () => {
   it("cold start (days 0-27) holds at the onboarding rate", () => {
     const goal = makeGoal({ onboardingDailyRate: 8 });

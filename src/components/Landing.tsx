@@ -10,7 +10,7 @@ export default function Landing() {
         className="animate-glow pointer-events-none absolute -top-40 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full opacity-60 blur-[120px]"
         style={{
           background:
-            "radial-gradient(circle, rgba(122,90,248,0.55), rgba(90,169,255,0.25), transparent 70%)",
+            "radial-gradient(circle, rgba(236,72,153,0.5), rgba(168,85,247,0.3), transparent 70%)",
         }}
       />
 
@@ -33,9 +33,7 @@ export default function Landing() {
         <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-6xl">
           Meet the version of you
           <br />
-          <span className="bg-gradient-to-r from-[#8b7bff] via-[#5aa9ff] to-[#3fd0c9] bg-clip-text text-transparent">
-            who made the other choice.
-          </span>
+          <span className="grad-primary-text">who made the other choice.</span>
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-lg text-white/60">
           Build your Future Self, make real decisions, and watch two timelines diverge —
@@ -60,7 +58,7 @@ export default function Landing() {
 
         <button
           onClick={goToOnboarding}
-          className="mt-10 rounded-full bg-gradient-to-r from-[#8b7bff] to-[#5aa9ff] px-8 py-3.5 text-base font-semibold text-[#0a0a12] shadow-[0_0_40px_rgba(122,90,248,0.35)] transition hover:brightness-110 active:scale-[0.98]"
+          className="grad-primary mt-10 rounded-full px-8 py-3.5 text-base font-semibold text-white shadow-[0_0_40px_rgba(236,72,153,0.35)] transition hover:brightness-110 active:scale-[0.98]"
         >
           Build my Future Self →
         </button>

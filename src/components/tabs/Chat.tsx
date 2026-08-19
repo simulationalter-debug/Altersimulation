@@ -28,17 +28,18 @@ export default function Chat() {
   };
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-3rem)] max-w-2xl flex-col sm:h-[calc(100vh-3rem)]">
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold tracking-tight">Ask {futureSelf.name}</h1>
-        <p className="mt-1 text-white/50">
+    <div className="flex h-[calc(100vh-5.5rem)] flex-col">
+      <div className="border-b border-white/10 bg-gradient-to-br from-[#ec4899]/15 via-[#a855f7]/10 to-transparent px-4 pb-5 pt-6 text-center">
+        <span className="text-3xl">{futureSelf.avatarEmoji}</span>
+        <h1 className="mt-1 text-lg font-bold">Ask {futureSelf.name}</h1>
+        <p className="mx-auto mt-1 max-w-xs text-xs text-white/50">
           Not a generic assistant — the version of you who's already living the goals you set.
         </p>
       </div>
 
-      <div className="flex-1 space-y-4 overflow-y-auto pb-4">
+      <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
         {chat.length === 0 && (
-          <div className="flex flex-wrap gap-2 pt-4">
+          <div className="flex flex-wrap gap-2 pt-2">
             {SUGGESTIONS.map((s) => (
               <button
                 key={s}
@@ -55,7 +56,7 @@ export default function Chat() {
             <div
               className={`animate-rise max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                 m.role === "user"
-                  ? "bg-gradient-to-r from-[#8b7bff] to-[#5aa9ff] text-[#0a0a12]"
+                  ? "grad-primary text-white"
                   : "border border-white/10 bg-white/[0.05] text-white/90"
               }`}
             >
@@ -76,7 +77,7 @@ export default function Chat() {
           e.preventDefault();
           submit(input);
         }}
-        className="flex gap-2 border-t border-white/10 pt-4"
+        className="flex gap-2 border-t border-white/10 px-4 py-3"
       >
         <input
           value={input}
@@ -86,7 +87,7 @@ export default function Chat() {
         />
         <button
           type="submit"
-          className="rounded-full bg-gradient-to-r from-[#8b7bff] to-[#5aa9ff] px-5 py-2.5 text-sm font-semibold text-[#0a0a12] transition hover:brightness-110"
+          className="grad-primary rounded-full px-5 py-2.5 text-sm font-semibold text-white transition"
         >
           Send
         </button>

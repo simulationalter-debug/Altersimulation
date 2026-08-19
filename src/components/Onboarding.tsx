@@ -1,41 +1,44 @@
 import { useState } from "react";
 import { useStore } from "../store";
 import { AREAS } from "../data/areas";
-import type { AreaId } from "../types";
+import { GOAL_TEMPLATES } from "../data/goalTemplates";
+import type { GoalCategory } from "../types";
 
 const AVATAR_OPTIONS = ["🧑🏽", "👩🏾", "👨🏻", "👩🏻", "🧑🏿", "👨🏾", "🧑🏼", "👩🏼"];
 
 export default function Onboarding() {
   const createFutureSelf = useStore((s) => s.createFutureSelf);
   const [step, setStep] = useState(0);
-  const [selectedAreas, setSelectedAreas] = useState<AreaId[]>(["money", "career", "fitness"]);
+  const [selectedCategories, setSelectedCategories] = useState<GoalCategory[]>([
+    "financial",
+    "career",
+    "fitness",
+  ]);
   const [name, setName] = useState("");
   const [avatarEmoji, setAvatarEmoji] = useState(AVATAR_OPTIONS[0]);
   const [monthsOut, setMonthsOut] = useState(12);
-  const [goals, setGoals] = useState<Partial<Record<AreaId, string>>>({});
+  const [targets, setTargets] = useState<Partial<Record<GoalCategory, number>>>({});
 
-  const toggleArea = (id: AreaId) => {
-    setSelectedAreas((prev) =>
-      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id],
-    );
+  const toggleCategory = (id: GoalCategory) => {
+    setSelectedCategories((prev) => (prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]));
   };
 
   const steps = [
     {
       title: "What matters to you right now?",
       subtitle: "Pick the areas you want Future You to focus on.",
-      canNext: selectedAreas.length >= 2,
+      canNext: selectedCategories.length >= 2,
       body: (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {AREAS.map((area) => {
-            const active = selectedAreas.includes(area.id);
+            const active = selectedCategories.includes(area.id);
             return (
               <button
                 key={area.id}
-                onClick={() => toggleArea(area.id)}
+                onClick={() => toggleCategory(area.id)}
                 className={`flex flex-col items-center gap-2 rounded-xl border p-4 text-sm transition ${
                   active
-                    ? "border-white/40 bg-white/10 text-white"
+                    ? "border-[#c084fc]/60 bg-[#a855f7]/10 text-white"
                     : "border-white/10 bg-white/[0.02] text-white/50 hover:border-white/20"
                 }`}
               >
@@ -62,7 +65,7 @@ export default function Onboarding() {
                   onClick={() => setAvatarEmoji(emoji)}
                   className={`flex h-12 w-12 items-center justify-center rounded-full border text-2xl transition ${
                     avatarEmoji === emoji
-                      ? "border-white/50 bg-white/10"
+                      ? "border-[#c084fc]/70 bg-[#a855f7]/15"
                       : "border-white/10 bg-white/[0.02] hover:border-white/25"
                   }`}
                 >
@@ -90,29 +93,34 @@ export default function Onboarding() {
               max={24}
               value={monthsOut}
               onChange={(e) => setMonthsOut(Number(e.target.value))}
-              className="w-full accent-[#8b7bff]"
+              className="w-full accent-[#a855f7]"
             />
           </div>
         </div>
       ),
     },
     {
-      title: `What does ${name || "Future You"} have?`,
-      subtitle: "One line per area — be specific, it sharpens the simulation.",
+      title: `What does ${name || "Future You"} achieve?`,
+      subtitle: "One target per area — this is Ghost You's training data too, so be realistic.",
       canNext: true,
       body: (
         <div className="space-y-4">
-          {selectedAreas.map((id) => {
+          {selectedCategories.map((id) => {
             const area = AREAS.find((a) => a.id === id)!;
+            const template = GOAL_TEMPLATES[id];
             return (
               <div key={id}>
                 <label className="mb-1.5 flex items-center gap-2 text-sm text-white/60">
-                  <span>{area.emoji}</span> {area.label}
+                  <span>{area.emoji}</span> {template.targetFieldLabel}
                 </label>
                 <input
-                  value={goals[id] ?? ""}
-                  onChange={(e) => setGoals((g) => ({ ...g, [id]: e.target.value }))}
-                  placeholder={placeholderFor(id)}
+                  type="number"
+                  min={0}
+                  value={targets[id] ?? ""}
+                  onChange={(e) =>
+                    setTargets((t) => ({ ...t, [id]: e.target.value === "" ? undefined : Number(e.target.value) }))
+                  }
+                  placeholder={String(template.defaultTarget)}
                   className="w-full rounded-xl border border-white/15 bg-white/[0.03] px-4 py-2.5 text-white placeholder:text-white/25 focus:border-white/40 focus:outline-none"
                 />
               </div>
@@ -132,9 +140,7 @@ export default function Onboarding() {
         {steps.map((_, i) => (
           <div
             key={i}
-            className={`h-1 flex-1 rounded-full transition ${
-              i <= step ? "bg-gradient-to-r from-[#8b7bff] to-[#5aa9ff]" : "bg-white/10"
-            }`}
+            className={`h-1 flex-1 rounded-full transition ${i <= step ? "grad-primary" : "bg-white/10"}`}
           />
         ))}
       </div>
@@ -155,30 +161,25 @@ export default function Onboarding() {
           disabled={!current.canNext}
           onClick={() => {
             if (isLast) {
-              createFutureSelf({ name: name.trim(), avatarEmoji, selectedAreas, goals, monthsOut });
+              const resolvedTargets = Object.fromEntries(
+                selectedCategories.map((id) => [id, targets[id] ?? GOAL_TEMPLATES[id].defaultTarget]),
+              ) as Partial<Record<GoalCategory, number>>;
+              createFutureSelf({
+                name: name.trim(),
+                avatarEmoji,
+                selectedCategories,
+                targets: resolvedTargets,
+                monthsOut,
+              });
             } else {
               setStep((s) => s + 1);
             }
           }}
-          className="rounded-full bg-gradient-to-r from-[#8b7bff] to-[#5aa9ff] px-7 py-3 text-sm font-semibold text-[#0a0a12] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-30"
+          className="grad-primary rounded-full px-7 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-30"
         >
           {isLast ? "Enter the simulation →" : "Continue"}
         </button>
       </div>
     </div>
   );
-}
-
-function placeholderFor(id: AreaId): string {
-  const map: Record<AreaId, string> = {
-    love: "Happy, secure relationship",
-    money: "£15k monthly income",
-    career: "Business thriving",
-    lifestyle: "New house",
-    travel: "4 countries visited",
-    confidence: "Speak up without overthinking it",
-    fitness: "Stronger & fitter",
-    family: "Present every week, not just holidays",
-  };
-  return map[id];
 }

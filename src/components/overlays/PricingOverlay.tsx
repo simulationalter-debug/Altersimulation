@@ -1,3 +1,4 @@
+import OverlayShell from "./OverlayShell";
 import Card from "../ui/Card";
 
 interface Tier {
@@ -51,24 +52,22 @@ const TIERS: Tier[] = [
   },
 ];
 
-export default function Pricing() {
+export default function PricingOverlay({ onClose }: { onClose: () => void }) {
   return (
-    <div className="mx-auto max-w-5xl space-y-8">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold tracking-tight">Feed the right timeline</h1>
-        <p className="mt-1 text-white/50">Upgrade any time. Cancel any time.</p>
+    <OverlayShell title="Upgrade" onClose={onClose}>
+      <div className="mb-5 text-center">
+        <h1 className="text-xl font-bold">Feed the right timeline</h1>
+        <p className="mt-1 text-sm text-white/50">Upgrade any time. Cancel any time.</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="space-y-4">
         {TIERS.map((tier) => (
           <Card
             key={tier.name}
-            className={`flex flex-col ${
-              tier.highlight ? "border-[#8b7bff]/50 bg-[#8b7bff]/[0.06]" : ""
-            }`}
+            className={`flex flex-col ${tier.highlight ? "border-[#a855f7]/50 bg-gradient-to-br from-[#ec4899]/10 to-[#a855f7]/10" : ""}`}
           >
             {tier.highlight && (
-              <span className="mb-3 w-fit rounded-full bg-gradient-to-r from-[#8b7bff] to-[#5aa9ff] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#0a0a12]">
+              <span className="grad-primary mb-3 w-fit rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
                 Most popular
               </span>
             )}
@@ -85,9 +84,7 @@ export default function Pricing() {
             </ul>
             <button
               className={`mt-5 w-full rounded-full py-2.5 text-sm font-semibold transition ${
-                tier.highlight
-                  ? "bg-gradient-to-r from-[#8b7bff] to-[#5aa9ff] text-[#0a0a12] hover:brightness-110"
-                  : "border border-white/15 text-white/80 hover:border-white/30"
+                tier.highlight ? "grad-primary text-white" : "border border-white/15 text-white/80 hover:border-white/30"
               }`}
             >
               {tier.name === "Free" ? "Current plan" : "Upgrade"}
@@ -95,6 +92,6 @@ export default function Pricing() {
           </Card>
         ))}
       </div>
-    </div>
+    </OverlayShell>
   );
 }

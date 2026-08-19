@@ -60,8 +60,14 @@ export function projectedRate(
   tuning: TuningConstants = DEFAULT_TUNING,
 ): number {
   const series = buildDailyDeltaSeries(actions, goal.goalId, goal.createdAt, asOfIso);
-  const window = windowedDeltas(series, asOfIso, tuning.ewmaWindowDays);
-  return ewmaRate(window, tuning.ewmaHalfLifeDays);
+  // A goal only has as much history as it's old — cap the lookback so a
+  // brand-new goal doesn't get its onboarding-seeded rate decayed through
+  // 27 days of "phantom" pre-creation zeros on day one (see ewmaRate's seed
+  // comment: that would silence every day-one decision/mission).
+  const daysAlive = daysBetween(goal.createdAt, asOfIso) + 1;
+  const effectiveWindow = Math.min(tuning.ewmaWindowDays, Math.max(1, daysAlive));
+  const window = windowedDeltas(series, asOfIso, effectiveWindow);
+  return ewmaRate(window, tuning.ewmaHalfLifeDays, goal.onboardingDailyRate);
 }
 
 export interface DailyTimelinePoint {
