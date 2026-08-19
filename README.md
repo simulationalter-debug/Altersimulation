@@ -78,7 +78,18 @@ output, never computed ad hoc in a component.
 ```bash
 npm install
 npm run dev     # Next.js dev server
-npm run build   # production build
+npm run build   # production build (static export, output: "export")
 npm run test    # vitest — engine unit tests
 npm run lint    # eslint
 ```
+
+## Running as a native app
+
+The build is a fully static export (no server needed at runtime), so
+it's wrapped with [Capacitor](https://capacitorjs.com) into real
+`android/` and `ios/` native projects, ready to open in Android
+Studio's emulator or Xcode's Simulator. See `docs/mobile-app.md` for
+the full setup (`npm run cap:android` / `npm run cap:ios`) — building
+and running the native projects needs tools this repo's dev
+environment may not have (Xcode requires macOS; Android Studio needs a
+local install), so that part happens on your own machine.

@@ -15,6 +15,10 @@ const eslintConfig = defineConfig([
     // Deno edge functions — a separate runtime/toolchain, not part of
     // this Next.js project's lint surface.
     "supabase/functions/**",
+    // Native Capacitor projects: vendored native code + the built
+    // static export copied in at sync time, not app source.
+    "android/**",
+    "ios/**",
   ]),
 ]);
 
